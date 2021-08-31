@@ -26,6 +26,8 @@ similar to above to use in frament without using requireActivity().getAsDrawble(
 
 fun Fragment.getAsDrawable(id:Int) = ContextCompat.getDrawable(this.requireActivity(),id)
 
+
+/** funtions that returns a callback flow of network availablity and automatically removes the callback when the couroutine is canceled **/
 @ExperimentalCoroutinesApi
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 fun Context.networkAvailableFlow(): Flow<Boolean> = callbackFlow {
@@ -50,6 +52,9 @@ fun Context.networkAvailableFlow(): Flow<Boolean> = callbackFlow {
         manager.unregisterNetworkCallback(callback)
     }
 }
+
+/** extension funtions returning a flow of characters in an edittext also removes the callback when the courotine is canceled , 
+call debounce(millis) to recieve callback after the millis in case you're hitting an api for each character **/
 
 fun EditText.afterTextChangedFlow(): Flow<Editable?> 
     = callbackFlow {
@@ -117,16 +122,17 @@ suspend fun Task<LocationSettingsResponse>.awaitGpsState() =
         }
     }
 
-// recieve in
+// decode an string that is  in base 64
 fun String.decode(): String {
     return Base64.decode(this, Base64.DEFAULT).toString(Charsets.UTF_8)
 }
 
-//send in --
+//encode an string  in base 64
 fun String.encode(): String {
     return Base64.encodeToString(this.toByteArray(Charsets.UTF_8), Base64.DEFAULT)
 }
 
+// easily check wheather or not location permisson allowed
 fun Fragment.locationPermissionAllowed() = ActivityCompat.checkSelfPermission(
     requireActivity(),
     Manifest.permission.ACCESS_FINE_LOCATION
@@ -136,16 +142,19 @@ fun Fragment.locationPermissionAllowed() = ActivityCompat.checkSelfPermission(
     Manifest.permission.ACCESS_COARSE_LOCATION
 ) == PackageManager.PERMISSION_GRANTED
 
+// get the address of a location
  fun Fragment.getAddressForLocation(location: Location): String {
     val geoCoder = Geocoder(requireActivity(),Locale.getDefault())
     val address = geoCoder.getFromLocation(location.latitude,location.longitude,1)
     return address[0].getAddressLine(0)
 }
  
+ //easily show a toast , never forget to call show()
  fun Fragment.showToast(msg: String = "Something went wrong , try again") {
     Toast.makeText(requireActivity(), msg, Toast.LENGTH_LONG).show()
 }
 
+ // easily show a toast
 fun Fragment.showToast(@StringRes msg: Int) {
     Toast.makeText(requireActivity(), msg, Toast.LENGTH_LONG).show()
 }
@@ -158,6 +167,7 @@ fun Fragment.hideSoftKeyboard() {
 }
 
 
+// sigin in firebase using coroutine , avoid callback
 suspend fun sigInWithPhoneAuthCredential(credential: PhoneAuthCredential) =
  suspendCancellableCoroutine<FirebaseUser?> { continuation ->
      FirebaseAuth.getInstance()
@@ -173,6 +183,7 @@ suspend fun sigInWithPhoneAuthCredential(credential: PhoneAuthCredential) =
 
 
 
+ // create user in firebase using co-routine , avoid callback
 suspend fun Fragment.createUserWithPhone(phoneNumber:String):Boolean{
 
    return suspendCancellableCoroutine { continuation ->
@@ -197,6 +208,8 @@ suspend fun Fragment.createUserWithPhone(phoneNumber:String):Boolean{
     }
 }
 
+//logout use in firebase using coroutine , avoid callback
+
 suspend fun logoutUser():Boolean{
    return suspendCancellableCoroutine<Boolean> { continuation ->
         var resumed = false
@@ -218,7 +231,7 @@ suspend fun logoutUser():Boolean{
 }
 
 
-
+// extension property to make menu invisible
 var Menu.visibility: Boolean
     get() = false
     set(value) {
@@ -227,26 +240,20 @@ var Menu.visibility: Boolean
         }
     }
     
-    @ExperimentalCoroutinesApi
-fun Context.networkAvailableFlow(): Flow<Boolean> = callbackFlow {
-    val callback =
-        object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                this@callbackFlow.trySend(true).isSuccess
-            }
-
-            override fun onLost(network: Network) {
-                this@callbackFlow.trySend(false).isSuccess
-            }
-        }
-    val manager = getSystemService(Context.CONNECTIVITY_SERVICE)
-            as ConnectivityManager
-    manager.registerNetworkCallback(NetworkRequest.Builder().run {
-        addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-        build()
-    }, callback)
-
-    awaitClose {
-        manager.unregisterNetworkCallback(callback)
-    }
+ 
+ // display notification in kotlin way
+ 
+ inline fun Context.notification(channelId: String, func: NotificationCompat.Builder.() -> Unit): Notification {
+    val builder = NotificationCompat.Builder(this, channelId)
+    builder.func()
+    return builder.build()
 }
+ 
+ //esily check whether or not a service is running , isServiceRunning<MySerice>()
+ fun <reified T> Context.isServiceRunning(): Boolean {
+    val manager = activityManager
+    return manager.getRunningServices(Integer.MAX_VALUE)
+            .any { T::class.java.name == it.service.className }
+}
+ 
+ 
