@@ -256,4 +256,93 @@ var Menu.visibility: Boolean
             .any { T::class.java.name == it.service.className }
 }
  
- 
+ /** Set the View visibility to VISIBLE and eventually animate the View alpha till 100% */
+fun View.visible(animate: Boolean = true) {
+    if (animate) {
+        animate().alpha(1f).setDuration(300).setListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationStart(animation: Animator) {
+                super.onAnimationStart(animation)
+                visibility = View.VISIBLE
+            }
+        })
+    } else {
+        visibility = View.VISIBLE
+    }
+}
+
+//get the occurances of a substirng in a string
+fun String.occurrencesOf(sub: String): Int {
+    var count = 0
+    var last = 0
+    while (last != -1) {
+        last = this.indexOf(sub, last)
+        if (last != -1) {
+            count++
+            last += sub.length
+        }
+    }
+    return count
+}
+
+
+//covert string to data using desired format
+fun String.toDate(format: String): Date? {
+  val dateFormatter = SimpleDateFormat(format, Locale.US)
+  return try {
+    dateFormatter.parse(this)
+  } catch (e: ParseException) {
+    null
+  }
+}
+
+//extension property to get the screen size in pixels
+@Suppress("DEPRECATION")
+val Context.screenSize: Point
+get() {
+  val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+  val display = wm.defaultDisplay
+  val size = Point()
+  display.getSize(size)
+  return size
+}
+
+//extension propery to get device model number
+val Any.deviceName: String
+get() {
+  val manufacturer = Build.MANUFACTURER
+  val model = Build.MODEL
+  return if (model.startsWith(manufacturer))
+    model.capitalize(Locale.getDefault())
+  else
+    manufacturer.capitalize(Locale.getDefault()) + " " + model
+}
+
+//esily get direction to a location
+fun Context.directionsTo(location: Location) {
+  val lat = location.latitude
+  val lng = location.longitude
+  val uri = String.format(Locale.US, "http://maps.google.com/maps?daddr=%f,%f", lat, lng)
+  try {
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+    intent.setClassName("com.google.android.apps.maps", "com.google.android.maps.MapsActivity")
+    startActivity(intent)
+  }
+  catch (e: ActivityNotFoundException) {
+    e.printStackTrace()
+
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+    startActivity(intent)
+  }
+}
+
+//convert string to uri
+val String.asUri: Uri?
+get() = try {
+  if (URLUtil.isValidUrl(this))
+    Uri.parse(this)
+  else
+    null
+} catch (e: Exception) {
+  null
+}
+
