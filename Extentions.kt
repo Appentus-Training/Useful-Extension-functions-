@@ -26,6 +26,8 @@ similar to above to use in frament without using requireActivity().getAsDrawble(
 
 fun Fragment.getAsDrawable(id:Int) = ContextCompat.getDrawable(this.requireActivity(),id)
 
+fun Fragment.getAsColor(id:Int) = ContextCompat.getColor(this.requireActivity(),id)
+
 
 /** funtions that returns a callback flow of network availablity and automatically removes the callback when the couroutine is canceled **/
 @ExperimentalCoroutinesApi
@@ -346,3 +348,39 @@ get() = try {
   null
 }
 
+// Send location updates to the consumer
+@ExperimentalCoroutinesApi
+@SuppressLint("MissingPermission")
+fun FusedLocationProviderClient.locationFlow() = callbackFlow<Location> {
+    // A new Flow is created. This code executes in a coroutine!
+
+    // 1. Create callback and add elements into the flow
+    val callback = object : LocationCallback() {
+        override fun onLocationResult(result: LocationResult?) {
+            result ?: return // Ignore null responses
+            for (location in result.locations) {
+                try {
+                    trySend(location).isSuccess // Send location to the flow
+                } catch (t: Throwable) {
+                    // Location couldn't be sent to the flow
+                }
+            }
+        }
+    }
+
+    // 2. Register the callback to get location updates by calling requestLocationUpdates
+    requestLocationUpdates(
+        LocationRequest.create(),
+        callback,
+        Looper.getMainLooper()
+    ).addOnFailureListener { e ->
+        close(e) // in case of error, close the Flow
+    }
+
+    // 3. Wait for the consumer to cancel the coroutine and unregister
+    // the callback. This suspends the coroutine until the Flow is closed.
+    awaitClose {
+        // Clean up code goes here
+        removeLocationUpdates(callback)
+    }
+}
