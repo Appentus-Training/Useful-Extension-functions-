@@ -384,3 +384,15 @@ fun FusedLocationProviderClient.locationFlow() = callbackFlow<Location> {
         removeLocationUpdates(callback)
     }
 }
+
+fun List<LatLng>.toStaticMapApiFormat() =
+    buildString {
+        if (size >= 2) {
+            for (i in 0..size - 2) {
+                val latLng = this@toStaticMapApiFormat[i]
+                append("${latLng.latitude},${latLng.longitude}|")
+            }
+            val latLng = this@toStaticMapApiFormat[size - 1]
+            append("${latLng.latitude},${latLng.longitude}")
+        }
+    }
