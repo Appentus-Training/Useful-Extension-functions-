@@ -1,5 +1,32 @@
 
 
+/** show desired loader in any fragment
+@param rootView  , loader will go in the midpoint of root view
+**/
+@SuppressLint("ResourceType")
+fun Fragment.showLoader(rootView : ViewGroup) {
+    val loaderAnimation = LottieAnimationView(requireActivity()).apply {
+        id = 12345
+        setAnimation(R.raw.loader)
+        repeatMode = LottieDrawable.INFINITE
+        loop(true)
+        layoutParams = ViewGroup.LayoutParams(50.toPx(), 50.toPx())
+        playAnimation()
+    }
+    loaderAnimation.doOnLayout {
+        it.x = rootView.width/2f - it.width/2
+        it.y = rootView.height/2f - it.height/2
+    }
+    rootView.addView(loaderAnimation)
+}
+
+// pass same viewgroup that was paased in showLoader(ViewGroup)
+@SuppressLint("ResourceType")
+fun removeLoader(rootView: ViewGroup){
+    val animationView = rootView.findViewById<LottieAnimationView>(12345)
+    rootView.removeView(animationView)
+}
+
 /**
  method of return the last location in sychronous fasion so that you don't need to use any callback in your code 
  @return the last location of the device **/
