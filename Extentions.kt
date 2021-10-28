@@ -170,7 +170,7 @@ private fun getCurrenciesList(): ArrayList<Currency> {
         val jsonArray = JSONArray(currenciesJson)
         val currenciesList = ArrayList<Currency>(jsonArray.length())
         for(i in 0 until jsonArray.length()){
-            val currency = Gson().fromJson(jsonArray.getJSONObject(0).toString(), Currency::class.java)
+            val currency = Gson().fromJson(jsonArray.getJSONObject(i).toString(), Currency::class.java)
             currenciesList.add(currency) 
         }
         return currenciesList
