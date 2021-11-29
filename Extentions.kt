@@ -1,12 +1,40 @@
-//return a list of all currencies 
-/**
-  Currency.kt
-    data class Currency(
-        val cc:String,
-        val symbol:String,
-        val name:String
-    )
-**/
+
+
+
+/*
+ Merges multiple audio file, duration of output file is equal to shortest audio file
+ @Param outputFilePath path of the output file , need to point to files containing raw pcm data example (.wav)
+ @Param audioPaths , a list of audio files that needs to be merged should be mp3 file
+ @returns merged file if merging was successful null otherwise
+ requires dependency implementation 'com.arthenica:ffmpeg-kit-full:4.5.LTS'
+ 
+ */
+@ExperimentalCoroutinesApi
+suspend fun mergeAudio(outputFilePath :String,audioPaths:List<String>) =
+    suspendCancellableCoroutine<File?> {
+        val mergeCommand = buildString {
+            audioPaths.forEach { audioPath ->
+                append("-i")
+                append(" ")
+                append(audioPath)
+            }
+            append(" -filter_complex amix=inputs=2:duration=first:dropout_transition=3 ")
+            append(outputFilePath)
+        }
+        FFmpegKit.executeAsync(mergeCommand) { session ->
+            if(session.returnCode.isSuccess){
+                it.resume(null){}
+            }else {
+                it.resume(File(outputFilePath)) {}
+            }
+        }
+    }
+    
+    // prints any object in logcat filter using system
+    fun Any.print() {
+    println(this)
+    }
+    
 private fun getCurrenciesList(): ArrayList<Currency> {
         val gson = Gson()
         val currenciesJson = """[
