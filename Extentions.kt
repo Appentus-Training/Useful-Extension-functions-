@@ -30,6 +30,42 @@ suspend fun mergeAudio(outputFilePath :String,audioPaths:List<String>) =
         }
     }
     
+    
+/*
+ put audio effect on wav audio file
+ @param outputFilePath path of the output file
+ @param audioPaths , a list of audio files that needs to be merged should be mp3 file,need to point to files containing raw pcm data example (.wav)
+ @param effects , a list of effect that need to be applied for example listOf("afade=t=in:ss=0:d=10","aecho=0.8:0.88:6:0.4") to appy echo and fade in effect to the final audio file
+ @returns merged file if merging was successful null otherwise
+ requires dependency implementation 'com.arthenica:ffmpeg-kit-full:4.5.LTS'
+ */
+suspend fun putEffects(inputFilePath:String,outputFilePath:String,effects:List<String>) =
+    suspendCancellableCoroutine<File?> {
+        val audioAfterEffectCommand = buildString {
+            append(" -y -i ")
+            append(inputFilePath)
+            append(" -af ")
+            effects.forEachIndexed { index , effect ->
+                append(effect)
+                if(index < effects.size - 1) {
+                    append(",")
+                }
+            }
+            append(" ")
+            append(outputFilePath)
+        }
+        FFmpegKit.executeAsync(audioAfterEffectCommand) { session ->
+            session.print()
+            if(session.returnCode.isSuccess){
+                it.resume(File(outputFilePath)){}
+            }else {
+                it.resume(null) {}
+            }
+        }
+    }
+    
+    
+    
     // prints any object in logcat filter using system
     fun Any.print() {
     println(this)
