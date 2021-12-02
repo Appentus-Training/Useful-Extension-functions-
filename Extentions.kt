@@ -1,6 +1,26 @@
 
 
-
+/*
+  finds and colors all urls contained in a string 
+  @param linkColor color for the url default is blue
+  @param linkClickAction action to perform when user click that link 
+ */
+fun String.linkify(linkColor:Int = Color.BLUE,linkClickAction:((String) -> Unit)? = null): SpannableStringBuilder {
+    val builder = SpannableStringBuilder(this)
+    val matcher = Patterns.WEB_URL.matcher(this)
+    while(matcher.find()){
+        val start = matcher.start()
+        val end = matcher.end()
+        builder.setSpan(ForegroundColorSpan(Color.BLUE),start,end,0)
+        val onClick = object : ClickableSpan(){
+            override fun onClick(p0: View) {
+                    linkClickAction?.invoke(matcher.group())
+            }
+        }
+        //builder.setSpan(onClick,start,end,0)
+    }
+    return builder
+}
 /*
  Merges multiple audio file, duration of output file is equal to shortest audio file
  @Param outputFilePath path of the output file , need to point to files containing raw pcm data example (.wav)
