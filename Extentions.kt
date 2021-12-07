@@ -1,5 +1,31 @@
 
+/**
+ * @author Abhinav Chouhan
+ * @since 7-dec-2021
+ * checks whether or not the given CharSequence contains at least given number of given
+ * @param number at least these many digits should be present 
+ * @return true if at least given number of digits are present false otherwise 
+ */
+fun CharSequence.hasAtLeastDigits(number:Int) = contains("[0-9]{${number},}".toRegex())
 
+/**
+ * * @author Abhinav Chouhan
+ * @since 7-dec-2021
+ * checks whether or not the given CharSequence contains at least given number of special characters 
+ * @param number at least these many special character should be present 
+ *  @return true if at least given number of special characters are present false otherwise
+ */
+fun CharSequence.hasAtLeastSpecialCharacters(number:Int) = contains("[\\W]{${number},}".toRegex())
+
+
+/**
+ * @author Abhinav Chouhan 
+ * @since 7-dec-2021
+ * checks whether or not the given CharSequence contains at least given number of length long
+ * @param number at least these characters should be present
+ *  @return true if at least given number of characters are present false otherwise
+ */
+fun CharSequence.hasAtLeastLength(number:Int) = length >= number
 /*
   finds and colors all urls contained in a string 
   @param linkColor color for the url default is blue
