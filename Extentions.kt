@@ -1,4 +1,20 @@
-
+/**
+ * sign in user with google using firebase with given google signin account and give back result without callback
+ * @param account GoogleSignInAccount that you want to sign into
+ * @return true if signin was successful false otherwise
+ */
+suspend fun signInWithGoogleFirebase(account: GoogleSignInAccount) = suspendCancellableCoroutine<Boolean> {  continuation ->
+    //showLoader(binding.rootView)
+    val mAuth = FirebaseAuth.getInstance()
+    val authCredential = GoogleAuthProvider.getCredential(account.idToken, null)
+    mAuth.signInWithCredential(authCredential).addOnCompleteListener {  signInTask ->
+        if(signInTask.isSuccessful){
+            continuation.resume(true,null)
+        }else{
+            continuation.resume(false,null)
+        }
+    }
+}
 /**
  * @author Abhinav Chouhan
  * @since 7-dec-2021
