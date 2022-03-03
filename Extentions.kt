@@ -1,3 +1,17 @@
+/**
+ * fades out a view making in completely invisible by default
+ * @param fadeDuration the duration of fade effect in milliseconds default value is 300ms
+ * @param endAlpha the alpha value that view will have after the animation completes default value is 0
+ */
+fun View.fadeOut(fadeDuration:Long = 300,endAlpha:Float = 0f){
+    ValueAnimator.ofFloat(1f,endAlpha).apply {
+        duration = fadeDuration
+        addUpdateListener {
+            val animatedValue = it.animatedValue as Float
+            alpha = animatedValue
+        }
+    }.start()
+}
 
 /**
  * fades in a view 
