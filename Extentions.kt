@@ -1,3 +1,18 @@
+
+/**
+ * fades in a view 
+ * @param fadeDuration the duration of fade effect in milliseconds default value is 300ms
+ */
+fun View.fadeIn(fadeDuration:Long = 300){
+    ValueAnimator.ofFloat(0f,1f).apply {
+        duration = fadeDuration
+        addUpdateListener {
+            val animatedValue = it.animatedValue as Float
+            alpha = animatedValue
+        }
+    }.start()
+}
+
 /**
  * sign in user with google using firebase with given google signin account and give back result without callback
  * @param account GoogleSignInAccount that you want to sign into
