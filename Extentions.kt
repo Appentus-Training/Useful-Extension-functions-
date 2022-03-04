@@ -1,3 +1,18 @@
+
+/**
+ * centers the title in a toolbar 
+ */
+fun Toolbar.centerTitle() {
+    doOnLayout {
+        children.forEach {
+            if (it is TextView) {
+                it.x = width / 2f - it.width / 2f
+                return@forEach
+            }
+        }
+    }
+}
+
 /**
  * fades out a view making in completely invisible by default
  * @param fadeDuration the duration of fade effect in milliseconds default value is 300ms
